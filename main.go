@@ -20,4 +20,9 @@ func main() {
 	if err == nil {
 		fmt.Println(readCoils)
 	}
+
+	readDiscreteInputs, err := plc.ReadDiscreteInputs(0, 4)
+	if err == nil {
+		fmt.Println(readDiscreteInputs)
+	}
 }

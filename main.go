@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 
 	"github.com/gvstr/go-modbus/modbus"
@@ -14,4 +15,9 @@ func main() {
 		log.Fatal(err)
 	}
 	defer plc.Disconnect()
+
+	readCoils, err := plc.ReadCoils(0, 3)
+	if err == nil {
+		fmt.Println(readCoils)
+	}
 }

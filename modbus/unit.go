@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -17,11 +18,12 @@ type Client struct {
 	Byteorder             binary.ByteOrder
 	Connection            net.Conn
 	Pollrate              time.Duration
-	UnitIdentifier        int
+	UnitIdentifier        uint8
 	transactionIdentifier uint16
+	sync.Mutex
 }
 
-func NewClient(name string, address string, port string, unitidentifier int, byteorder binary.ByteOrder) *Client {
+func NewClient(name string, address string, port string, unitidentifier uint8, byteorder binary.ByteOrder) *Client {
 	return &Client{
 		Name:                  name,
 		Address:               address,
@@ -33,6 +35,8 @@ func NewClient(name string, address string, port string, unitidentifier int, byt
 }
 
 func (c *Client) Connect() error {
+	c.Lock()
+	defer c.Unlock()
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", c.Address, c.Port))
 	if err != nil {
 		return err
@@ -46,5 +50,37 @@ func (c *Client) Connect() error {
 }
 
 func (c *Client) Disconnect() error {
+	c.Lock()
+	defer c.Unlock()
 	return c.Connection.Close()
+}
+
+func (c *Client) getTransactionIdentifier() uint16 {
+	c.Lock()
+	defer c.Unlock()
+	if c.transactionIdentifier >= 65535 {
+		c.transactionIdentifier = 0
+	} else {
+		c.transactionIdentifier += 1
+	}
+	return c.transactionIdentifier
+}
+
+func (c *Client) sendRequest(request []byte) ([]byte, error) {
+	c.Lock()
+	defer c.Unlock()
+	if _, err := c.Connection.Write(request); err != nil {
+		return nil, err
+	}
+
+	reply := make([]byte, 260)
+
+	bytesRead, err := c.Connection.Read(reply)
+	if err != nil {
+		return nil, err
+	}
+
+	reply = reply[:bytesRead]
+
+	return reply, nil
 }

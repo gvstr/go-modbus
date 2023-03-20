@@ -1,5 +1,10 @@
 package modbus
 
+import (
+	"bytes"
+	"encoding/binary"
+)
+
 func boolsToBits(values []bool) []byte {
 	bytesRequired := uint(len(values)) / 8
 	if len(values)%8 != 0 {
@@ -20,6 +25,17 @@ func bytesToBools(bytes []byte) []bool {
 		if bytes[i/8]&(1<<(i%8)) != 0 {
 			result[i] = true
 		}
+	}
+	return result
+}
+
+func bytesToInt16(input []byte, byteOrder binary.ByteOrder) []int16 {
+	result := make([]int16, len(input)/2)
+	buf := bytes.NewReader(input)
+	for i := 0; i < len(result); i++ {
+		var n int16
+		binary.Read(buf, byteOrder, &n)
+		result[i] = int16(n)
 	}
 	return result
 }

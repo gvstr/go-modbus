@@ -25,4 +25,9 @@ func main() {
 	if err == nil {
 		fmt.Println(readDiscreteInputs)
 	}
+
+	readHoldingRegisters, err := plc.ReadHoldingRegisters(0, 4)
+	if err == nil {
+		fmt.Println(readHoldingRegisters)
+	}
 }

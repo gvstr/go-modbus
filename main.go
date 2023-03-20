@@ -30,4 +30,9 @@ func main() {
 	if err == nil {
 		fmt.Println(readHoldingRegisters)
 	}
+
+	readInputRegisters, err := plc.ReadInputRegisters(0, 4)
+	if err == nil {
+		fmt.Println(readInputRegisters)
+	}
 }

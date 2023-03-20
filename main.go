@@ -35,4 +35,9 @@ func main() {
 	if err == nil {
 		fmt.Println(readInputRegisters)
 	}
+
+	err = plc.WriteSingleCoil(0, true)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

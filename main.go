@@ -40,4 +40,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	err = plc.WriteSingleRegister(0, 123)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

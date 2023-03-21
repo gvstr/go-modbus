@@ -1,10 +1,5 @@
 package modbus
 
-import (
-	"bytes"
-	"encoding/binary"
-)
-
 // Function code 01 (0x01) Read Coils
 // This function code is used to read from 1 to 2000 contiguous status of coils in a remote
 // device. The Request PDU specifies the starting address, i.e. the address of the first coil
@@ -29,39 +24,12 @@ func (c *Client) ReadCoils(startingAddress uint16, quantityOfRegisters uint16) (
 		return nil, err
 	}
 
-	// Buffer to hold the request message
-	buffer := new(bytes.Buffer)
-
-	// Transaction identifier
-	if err := binary.Write(buffer, c.Byteorder, c.getTransactionIdentifier()); err != nil {
-		return nil, err
-	}
-	// Protocol identifier
-	if err := binary.Write(buffer, c.Byteorder, uint16(0)); err != nil {
-		return nil, err
-	}
-	// Length
-	if err := binary.Write(buffer, c.Byteorder, uint16(6)); err != nil {
-		return nil, err
-	}
-	// Unit identifier
-	if err := binary.Write(buffer, c.Byteorder, c.UnitIdentifier); err != nil {
-		return nil, err
-	}
-	// Function code
-	if err := binary.Write(buffer, c.Byteorder, uint8(1)); err != nil {
-		return nil, err
-	}
-	// Starting address
-	if err := binary.Write(buffer, c.Byteorder, startingAddress); err != nil {
-		return nil, err
-	}
-	// Quantity of registers
-	if err := binary.Write(buffer, c.Byteorder, quantityOfRegisters); err != nil {
+	readRequest, err := c.getReadRequest(startingAddress, quantityOfRegisters, 1)
+	if err != nil {
 		return nil, err
 	}
 
-	reply, err := c.sendRequest(buffer.Bytes())
+	reply, err := c.sendRequest(readRequest)
 	if err != nil {
 		return nil, err
 	}

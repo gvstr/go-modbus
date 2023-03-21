@@ -1,6 +1,7 @@
 package modbus
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -8,9 +9,6 @@ import (
 	"time"
 )
 
-// No support for gateway functionality yet, need to split
-// unitid out to a device type and have a slice of devices
-// in client.
 type Client struct {
 	Name                  string
 	Address               string
@@ -41,6 +39,7 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
+
 	// conn.SetReadDeadline(time.Now().Add(socketReadTimeout))
 	// conn.SetWriteDeadline(time.Now().Add(socketWriteTimeout))
 
@@ -83,4 +82,39 @@ func (c *Client) sendRequest(request []byte) ([]byte, error) {
 	reply = reply[:bytesRead]
 
 	return reply, nil
+}
+
+func (c *Client) getReadRequest(startingAddress uint16, quantityOfRegisters uint16, functionCode uint8) ([]byte, error) {
+	// Buffer to hold the request message
+	buffer := new(bytes.Buffer)
+	// Transaction identifier
+	if err := binary.Write(buffer, c.Byteorder, c.getTransactionIdentifier()); err != nil {
+		return nil, err
+	}
+	// Protocol identifier
+	if err := binary.Write(buffer, c.Byteorder, uint16(0)); err != nil {
+		return nil, err
+	}
+	// Length
+	if err := binary.Write(buffer, c.Byteorder, uint16(6)); err != nil {
+		return nil, err
+	}
+	// Unit identifier
+	if err := binary.Write(buffer, c.Byteorder, c.UnitIdentifier); err != nil {
+		return nil, err
+	}
+	// Function code
+	if err := binary.Write(buffer, c.Byteorder, functionCode); err != nil {
+		return nil, err
+	}
+	// Starting address
+	if err := binary.Write(buffer, c.Byteorder, startingAddress); err != nil {
+		return nil, err
+	}
+	// Quantity of registers
+	if err := binary.Write(buffer, c.Byteorder, quantityOfRegisters); err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
 }

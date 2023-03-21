@@ -1,10 +1,5 @@
 package modbus
 
-import (
-	"bytes"
-	"encoding/binary"
-)
-
 // Function code 03 (0x03) Read Holding Registers
 // This function code is used to read the contents of a contiguous block of holding registers in a
 // remote device. The Request PDU specifies the starting register address and the number of
@@ -25,39 +20,12 @@ func (c *Client) ReadHoldingRegisters(startingAddress uint16, quantityOfRegister
 		return nil, err
 	}
 
-	// Buffer to hold the request message
-	buffer := new(bytes.Buffer)
-
-	// Transaction identifier
-	if err := binary.Write(buffer, c.Byteorder, c.getTransactionIdentifier()); err != nil {
-		return nil, err
-	}
-	// Protocol identifier
-	if err := binary.Write(buffer, c.Byteorder, uint16(0)); err != nil {
-		return nil, err
-	}
-	// Length
-	if err := binary.Write(buffer, c.Byteorder, uint16(6)); err != nil {
-		return nil, err
-	}
-	// Unit identifier
-	if err := binary.Write(buffer, c.Byteorder, c.UnitIdentifier); err != nil {
-		return nil, err
-	}
-	// Function code
-	if err := binary.Write(buffer, c.Byteorder, uint8(3)); err != nil {
-		return nil, err
-	}
-	// Starting address
-	if err := binary.Write(buffer, c.Byteorder, startingAddress); err != nil {
-		return nil, err
-	}
-	// Quantity of registers
-	if err := binary.Write(buffer, c.Byteorder, quantityOfRegisters); err != nil {
+	readRequest, err := c.getReadRequest(startingAddress, quantityOfRegisters, 3)
+	if err != nil {
 		return nil, err
 	}
 
-	reply, err := c.sendRequest(buffer.Bytes())
+	reply, err := c.sendRequest(readRequest)
 	if err != nil {
 		return nil, err
 	}

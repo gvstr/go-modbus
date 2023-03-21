@@ -45,4 +45,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	err = plc.WriteMultipleCoils(10, []bool{true, true, true, true, true, true, true, true, false, true})
+	if err != nil {
+		fmt.Println(err)
+	}
 }

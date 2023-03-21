@@ -19,6 +19,11 @@ func boolsToBits(values []bool) []byte {
 	return result
 }
 
+// i/8 is the index of the byte in the bytes slice that contains the bit for the current element.
+// i%8 is the position of the bit within the byte that corresponds to the current element.
+// 1<<(i%8) is a bit mask that has a 1 in the position corresponding to the current element.
+// bytes[i/8]&(1<<(i%8)) is a bitwise AND operation that extracts the bit from the byte.
+// If the result is not zero, then the bit is set, so result[i] is set to true.
 func bytesToBools(bytes []byte) []bool {
 	result := make([]bool, len(bytes)*8)
 	for i := 0; i < len(result); i++ {

@@ -50,4 +50,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	err = plc.WriteMultipleRegisters(0, []uint16{100, 200, 300, 400, 500, 600, 700, 800, 900})
+	if err != nil {
+		fmt.Println(err)
+	}
 }
